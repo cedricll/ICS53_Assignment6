@@ -167,7 +167,15 @@ void *server_handler(void *fd_pointer)
         printf("cmd %s\n", cmd);
         printf("arg %s\n", arg);
 
-        // assign result with strcpy, and use arg parameter for the argument
+//////////////////////////////////// call file functions here//////////////////////////////////////////////////////////
+
+        // assign result with strcpy, strcpy(result, _____)
+
+        // cmd is the command
+        // arg is the argument
+        // exaple: cmd = openRead, arg = a.txt; openRead(a.txt)
+        
+
         if (strcmp(cmd, "openRead") == 0) { 
             printf("openRead Function\n");
         }
@@ -187,6 +195,8 @@ void *server_handler(void *fd_pointer)
         else if (strcmp(cmd, "close") == 0) {
             printf("close Function\n");
         }
+
+///////////////////////////////// end of calling file functions //////////////////////////////////////////////////////////
 
         // else if (strcmp(cmd, "quit") == 0) {
         //     printf("Disconnected from %s: %d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
