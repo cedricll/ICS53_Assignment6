@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <errno.h> //For errno - the error number
 
+
 struct hostent *gethostbyname(const char *name);
 
 #define PORT 30000
@@ -66,12 +67,16 @@ int main(int argc, char const *argv[])
     int sock, valread; // sock = 0?
     struct sockaddr_in serv_addr; 
 
+	// char server_reply[1000];
+	ssize_t n;
+
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
     { 
         printf("\n Socket creation error \n"); 
         return -1; // exit(1)
     } 
 
+	bzero(&serv_addr, sizeof(serv_addr));
 	memset(&serv_addr, '\0', sizeof(serv_addr));
 
     serv_addr.sin_family = AF_INET; 
@@ -98,10 +103,12 @@ int main(int argc, char const *argv[])
 	char cmd[MAXLINE]; // will contain content to send to the server 
     char cmdline[MAXLINE]; // for user inputs
 
-	while (1) {
-		char buffer[1024] = {0}; 
-		// Display prompt and get user input
+	// new code
+	while (1) 
+	{
+		char buffer[1024] = {0};
 		printf("> ");
+		// scanf("%s", buffer);
 		fgets(cmdline, MAXLINE, stdin);
 		if (feof(stdin)) exit(0);  
 
@@ -112,8 +119,8 @@ int main(int argc, char const *argv[])
 		int cx;
 
 		if (strcmp(argv[0], "openRead") == 0 ) { // openRead a.txt
-            cx = snprintf(buf, buf_size, "%s %s", argv[0], argv[1]); 
-            strcpy(cmd, buf);
+			cx = snprintf(buf, buf_size, "%s %s", argv[0], argv[1]); 
+			strcpy(cmd, buf);
         }
 
 		else if (strcmp(argv[0], "openAppend") == 0 ) { // openAppend a.txt
@@ -137,40 +144,40 @@ int main(int argc, char const *argv[])
         }
 
 		else if (strcmp(argv[0], "quit") == 0) {
+			send(sock, "quit", strlen("quit"), 0);
 			close(sock);
-			// printf("Disconnected from server\n");
+			printf("Disconnected from server\n");
 			exit(1);
+			break;
 		}
 
 		// // posiiton this code if this snippet is needed
 		else {
 			printf("Invalid Command\n");
-			// continue;
-			strcpy(cmd, "Invalid Command");
+			// strcpy(cmd, "Invalid Command");
 			continue;
 		}
 
-		// printf("cmd: %s\n", cmd);
+		printf("cmd sent to server: %s\n", cmd);
 
-		
+		send(sock, cmd, strlen(cmd), 0);
 
-		// this sends content to the server
-		send(sock, cmd, strlen(cmd), 0); 
-
-		// if (strcmp(argv[0], "quit") == 0) {
-		// 	close(sock);
-		// 	// printf("Disconnected from server\n");
-		// 	exit(1);
+		// if (send(sock, buffer, strlen(buffer), 0) < 0)
+		// {
+		// 	printf("Error\n");
+		// 	return -1;
 		// }
 
-		if (recv(sock, buffer, 1024, 0) < 0) {
-			printf("Error in recieving data\n");
-		}
-		else {
-			printf("Server: %s\n", buffer); // what we get from server
+		if (recv(sock, buffer, 1024, 0) < 0) 
+		{
+			printf("error recieving data");
+			break;
 		}
 
+		printf("Server Reply: %s\n", buffer);
 	}
+
+	close(sock);
 
 	return 0;
 }
